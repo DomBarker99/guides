@@ -618,46 +618,40 @@ The server is now running and authenticated. Point your MCP client at it.
 
 ### Claude Code
 
-Claude Code has two levels of MCP configuration:
+Use the `claude mcp add` CLI command to register the server. **Do not manually edit `~/.claude.json`** — it contains auto-generated state that is easy to corrupt.
 
-- **Global** (`~/.claude.json`) — the MCP server is available in every Claude Code session, regardless of which directory you start it from. Use this when the MCP server is a general-purpose tool you always want available.
-- **Project-level** (`.mcp.json` in the project root) — the MCP server is only available when Claude Code is started from that specific project directory. Use this when the MCP server is only relevant to a particular project.
+**User-wide configuration (recommended for Google Workspace):**
 
-**Global configuration (recommended for Google Workspace):**
+This makes the MCP server available in every Claude Code session, regardless of which directory you start it from:
 
-Edit `~/.claude.json` and add a top-level `mcpServers` key:
-
-```json
-{
-  "mcpServers": {
-    "google-workspace": {
-      "type": "streamable-http",
-      "url": "http://<vm-ip>:8000/mcp"
-    }
-  }
-}
+```bash
+claude mcp add --transport http --scope user google-workspace http://<vm-ip>:8000/mcp
 ```
-
-**Important:** Make sure the `mcpServers` block is at the **top level** of the JSON file, not nested inside a `projects` key. If it is nested under `projects > /your/path`, it will only work in that directory.
 
 If Claude Code is running on the same VM as the MCP server, use `http://localhost:8000/mcp`. If connecting from a different machine, replace `<vm-ip>` with the VM's IP address on the local network.
 
 **Project-level configuration:**
 
-Create a `.mcp.json` file in the project root:
+This makes the MCP server available only when Claude Code is started from the current project directory:
 
-```json
-{
-  "mcpServers": {
-    "google-workspace": {
-      "type": "streamable-http",
-      "url": "http://<vm-ip>:8000/mcp"
-    }
-  }
-}
+```bash
+claude mcp add --transport http --scope project google-workspace http://<vm-ip>:8000/mcp
 ```
 
-This only makes the MCP server available when Claude Code is started from that project directory.
+This creates a `.mcp.json` file in the project root that can be checked into version control.
+
+**Managing MCP servers:**
+
+```bash
+# List all configured servers
+claude mcp list
+
+# Get details for a specific server
+claude mcp get google-workspace
+
+# Remove a server
+claude mcp remove google-workspace
+```
 
 ### VS Code
 
@@ -667,7 +661,7 @@ Add to your VS Code MCP settings (`.vscode/mcp.json` or user settings):
 {
   "servers": {
     "google-workspace": {
-      "type": "streamable-http",
+      "type": "http",
       "url": "http://<vm-ip>:8000/mcp"
     }
   }
